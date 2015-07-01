@@ -10,7 +10,7 @@
 
 @implementation APIResponse
 
-+ (APIResponse*)responseWithJSON:(NSDictionary*)json requestFailed:(BOOL)requestFailed noInternetConnection:(BOOL)noInternetConnection
++ (APIResponse*)responseWithJSON:(NSArray*)json requestFailed:(BOOL)requestFailed noInternetConnection:(BOOL)noInternetConnection
 {
     APIResponse* response = [[APIResponse alloc] init];
     

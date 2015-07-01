@@ -101,9 +101,9 @@
         [login setTranslatesAutoresizingMaskIntoConstraints:NO];
         [cell.contentView addSubview:avatar];
         [avatar setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:login attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0]];
-        [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:avatar attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0]];
-        [cell.contentView addConstraint:[NSLayoutConstraint constraintWithItem:avatar attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50]];
+        [cell.contentView addConstraints:@[[NSLayoutConstraint constraintWithItem:avatar attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0],
+                                           [NSLayoutConstraint constraintWithItem:avatar attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50],
+                                           [NSLayoutConstraint constraintWithItem:login attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:cell.contentView attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0]]];
         [cell.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[login]-5-[avatar(==50)]-15-|" options:NSLayoutFormatDirectionLeadingToTrailing metrics:nil views:NSDictionaryOfVariableBindings(login, avatar)]];
     }
     UILabel* login = (UILabel*)[cell.contentView viewWithTag:10];
@@ -118,16 +118,19 @@
 
 - (void)loadUsers
 {
-    [[GithubAPI sharedInstance] GET:APIGithubUsers parameters: @{@"since": [NSNumber numberWithInt:_users.count]} onCompletion:^(APIResponse *response) {
+    // Looks like "since" parameter is an "id" of user
+    NSNumber* since = _users.count > 0 ? [NSNumber numberWithInteger:[_users[_users.count - 1][@"id"] integerValue]/*_users.count*/] : [NSNumber numberWithInt:0];
+    [[GithubAPI sharedInstance] GET:APIGithubUsers parameters: @{@"since": since} onCompletion:^(APIResponse *response) {
         if (response.requestFailed)
         {
-            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Упс" message:@"Не получается загрузить" delegate:self cancelButtonTitle:@"Попробовать еще" otherButtonTitles: nil];
+            UIAlertView* alert = [[UIAlertView alloc] initWithTitle:@"Упс" message:@"Не получается загрузить" delegate:self cancelButtonTitle:@"Отмена" otherButtonTitles:@"Попробовать еще", nil];
             [alert show];
         }
         else
         {
-            [_users addObjectsFromArray:(NSArray*)response.json];
+            [_users addObjectsFromArray:response.json];
             [_table reloadData];
+            [_table finishInfiniteScroll];
             _table.hidden = NO;
         }
     }];
@@ -137,7 +140,16 @@
 
 - (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
 {
-    [self loadUsers];
+    switch (buttonIndex)
+    {
+        case 1:
+            [self loadUsers];
+            break;
+            
+        default:
+            [_table finishInfiniteScroll];
+            break;
+    }
 }
 
 @end

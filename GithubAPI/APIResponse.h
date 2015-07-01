@@ -10,10 +10,10 @@
 
 @interface APIResponse : NSObject
 
-@property (nonatomic, strong) NSDictionary* json;
+@property (nonatomic, strong) NSArray* json;
 @property (nonatomic) BOOL requestFailed;
 @property (nonatomic) BOOL noInternetConnection;
 
-+ (APIResponse*)responseWithJSON:(NSDictionary*)json requestFailed:(BOOL)requestFailed noInternetConnection:(BOOL)noInternetConnection;
++ (APIResponse*)responseWithJSON:(NSArray*)json requestFailed:(BOOL)requestFailed noInternetConnection:(BOOL)noInternetConnection;
 
 @end
