@@ -119,7 +119,7 @@
 - (void)loadUsers
 {
     // Looks like "since" parameter is an "id" of user
-    NSNumber* since = _users.count > 0 ? [NSNumber numberWithInteger:[_users[_users.count - 1][@"id"] integerValue]/*_users.count*/] : [NSNumber numberWithInt:0];
+    NSNumber* since = _users.count > 0 ? [NSNumber numberWithInteger:[_users.lastObject[@"id"] integerValue]] : [NSNumber numberWithInt:0];
     [[GithubAPI sharedInstance] GET:APIGithubUsers parameters: @{@"since": since} onCompletion:^(APIResponse *response) {
         if (response.requestFailed)
         {
